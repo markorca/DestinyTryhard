@@ -9,12 +9,12 @@ class BungieRepository
 		$this->x_api_key = config('web.bungie.X-API-KEY');
 	}
 
-	public function getDestiny2Manifest()
+	public function execCurl($path, $data = []) 
 	{
 		$curl = curl_init();
 
 		curl_setopt_array($curl, array(
-		  CURLOPT_URL => "https://www.bungie.net/Platform/Destiny2/Manifest/",
+		  CURLOPT_URL => "https://www.bungie.net/Platform" . $path,
 		  CURLOPT_RETURNTRANSFER => true,
 		  CURLOPT_MAXREDIRS => 10,
 		  CURLOPT_TIMEOUT => 30,
@@ -33,11 +33,50 @@ class BungieRepository
 		curl_close($curl);
 
 		if ($err) {
-		  echo "cURL Error #:" . $err;
+		    // echo "cURL Error #:" . $err;
+			// TODO: write error log
+			return false;
 		} else {
-		  echo $response;
+			return json_decode($response, true);
 		}
+	}
 
-		exit;
+	public function searchUsers($searchString) 
+	{
+		$path = "/User/SearchUsers/?q=" . urlencode($searchString);
+
+		$response = $this->execCurl($path);
+
+		echo json_encode($response);exit;
+
+	}
+
+	public function getDestiny2Manifest()
+	{
+		$path = "/Destiny2/Manifest/";
+
+		$response = $this->execCurl($path);
+		echo json_encode($response);exit;
+	}
+
+	public function searchDestinyPlayer($membershipType, $displayName)
+	{
+		$path = "/Destiny2/SearchDestinyPlayer/{$membershipType}/{$displayName}/";
+
+		$response = $this->execCurl($path);
+		echo json_encode($response);exit;
+	}
+
+	/*
+	 * membershipType: xbox-1, psn-2, blizzard-4
+	 *
+	 */
+	public function getDestiny2Profile($membershipType, $destinyMembershipId) 
+	{
+		$path = "/Destiny2/{$membershipType}/Profile/{$destinyMembershipId}/";
+
+		$response = $this->execCurl($path);
+		echo json_encode($response);exit;
+
 	}
 }
